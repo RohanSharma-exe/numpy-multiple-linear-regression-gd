@@ -272,8 +272,16 @@ def root_mean_squared_error(y_true, y_pred):
     # TODO: Return the root mean squared error between y_true and y_pred.
     return float(np.sqrt(np.mean((y_true - y_pred) ** 2)))
 
-# Step 20 - r_squared (not yet solved)
-# TODO: implement
+# Step 20 - r_squared
+def r_squared(y_true, y_pred):
+    # TODO: Compute the coefficient of determination R^2.
+    residual_sum_squares = np.sum((y_true - y_pred) ** 2)
+    total_sum_squares = np.sum((y_true - np.mean(y_true)) ** 2)
+
+    if total_sum_squares == 0:
+        return float("nan")
+
+    return float(1 - residual_sum_squares / total_sum_squares)
 
 # Step 21 - evaluate_regression (not yet solved)
 # TODO: implement
