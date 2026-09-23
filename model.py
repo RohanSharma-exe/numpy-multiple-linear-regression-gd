@@ -108,12 +108,13 @@ def mse_gradient(X, y_true, y_pred):
 # Step 10 - normal_equation
 def normal_equation(X, y):
     # TODO: Solve for the closed-form least-squares weights via the normal equation.
-    X_transpose = np.transpose(X)
+    A = X.T @ X
+    b = X.T @ y
 
-    A = X_transpose @ X
-    b = X_transpose @ y
-
-    return np.linalg.solve(A, b)
+    try:
+        return np.linalg.solve(A, b)
+    except np.linalg.LinAlgError:
+        return np.linalg.lstsq(X, y, rcond=None)[0]
 
 # Step 11 - initialize_weights
 def initialize_weights(n_features, seed=None):
@@ -324,8 +325,52 @@ def create_lr_model(learning_rate=0.01, epochs=1000, patience=50, seed=0):
         "val_losses": [],
     }
 
-# Step 25 - fit_lr_model (not yet solved)
-# TODO: implement
+# Step 25 - fit_lr_model
+def fit_lr_model(model, X_train, y_train, X_val, y_val):
+    # TODO: Fit model with train stats, design matrices, GD, and normal eq
+    # 1. Compute feature statistics using training data only
+    mean, std = compute_feature_stats(X_train)
+
+    # 2. Build design matrices
+    X_train_design = prepare_design_matrix(
+        X_train,
+        mean,
+        std
+    )
+
+    X_val_design = prepare_design_matrix(
+        X_val,
+        mean,
+        std
+    )
+
+    # 3. Train using batch gradient descent
+    weights, train_losses, val_losses = train_batch_gd(
+        X_train_design,
+        y_train,
+        X_val_design,
+        y_val,
+        model["learning_rate"],
+        model["epochs"],
+        model["patience"],
+        model["seed"],
+    )
+
+    # 4. Compute closed-form solution using training data
+    normal_weights = normal_equation(
+        X_train_design,
+        y_train
+    )
+
+    # 5. Update the same model dictionary
+    model["mean"] = mean
+    model["std"] = std
+    model["weights"] = weights
+    model["normal_weights"] = normal_weights
+    model["train_losses"] = train_losses
+    model["val_losses"] = val_losses
+
+    return model
 
 # Step 26 - predict_lr_model (not yet solved)
 # TODO: implement
